@@ -13,6 +13,7 @@
 /*************************************************************/
 
 #include "TI85.h"
+#include "QNX/QNXMenu.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -267,9 +268,24 @@ int ResetTI85(int NewMode)
     if(Verbose) printf("Loading %s...",Config[M].ROMFile);
     if(F=fopen(Config[M].ROMFile,"rb"))
     {
-      J = fread(ROM,1,Config[M].ROMSize,F);
-      J = (J==Config[M].ROMSize);
-      fclose(F);
+    	fseek(F, 0, SEEK_END);
+    	J = ftell(F);
+    	if (J != Config[M].ROMSize)
+    	{
+    		char errMsg[256];
+    		sprintf(errMsg, "The ROM file %s must be <b>%d</b> bytes, the one provided is <b>%d</b> bytes.", Config[M].ROMFile, Config[M].ROMSize, J);
+    		msg_box1("Error", errMsg);
+    		fclose(F);
+    	    if(WorkDir) { chdir(WorkDir); free(WorkDir); }
+    		return 0;
+    	}
+    	else
+    	{
+    		rewind(F);
+			J = fread(ROM,1,Config[M].ROMSize,F);
+			J = (J==Config[M].ROMSize);
+			fclose(F);
+    	}
     }
     if(Verbose) puts(J? "OK":"FAILED");
 

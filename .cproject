@@ -295,6 +295,10 @@
 									<listOptionValue builtIn="false" value="USING_GL11"/>
 									<listOptionValue builtIn="false" value="NO_AUDIO_PLAYBACK"/>
 									<listOptionValue builtIn="false" value="Q_OS_QNX"/>
+									<listOptionValue builtIn="false" value="BPS16"/>
+									<listOptionValue builtIn="false" value="ATI85"/>
+									<listOptionValue builtIn="false" value="LSB_FIRST"/>
+									<listOptionValue builtIn="false" value="NO_CONDEBUG"/>
 									<listOptionValue builtIn="false" value="BPP32"/>
 								</option>
 								<inputType id="com.qnx.qcc.inputType.compiler.520825096" superClass="com.qnx.qcc.inputType.compiler"/>
@@ -477,4 +481,5 @@
 		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="refreshScope"/>
 </cproject>

@@ -10,6 +10,7 @@
 /**     commercially. Please, notify me, if you make any    **/
 /**     changes to this file.                               **/
 /*************************************************************/
+#include <errno.h>
 #include "../EMULib.h"
 #include "../LibARM.h"
 #include "../Console.h"
@@ -105,7 +106,7 @@ int InitQNX(const char *Title,int Width,int Height)
 
 	screen_create_window(&window, ctxt);
 
-	int usage = SCREEN_USAGE_NATIVE;
+	int usage = SCREEN_USAGE_WRITE | SCREEN_USAGE_NATIVE;
 	screen_set_window_property_iv(window, SCREEN_PROPERTY_USAGE, &usage);
 
 	screen_create_window_buffers(window, 1);
@@ -142,9 +143,34 @@ int ShowVideo(void)
   /* Allocate image buffer if none */
   if(!OutImg.Data&&!NewImage(&OutImg,XSize,YSize)) return(0);
 
+  /* Count framerate */
+  if((Effects&EFF_SHOWFPS)&&(++FrameCount>=120))
+  {
+    struct timeval NewTS;
+    int Time;
+
+    gettimeofday(&NewTS,0);
+    Time       = (NewTS.tv_sec-TimeStamp.tv_sec)*1000
+               + (NewTS.tv_usec-TimeStamp.tv_usec)/1000;
+    FrameRate  = 1000*FrameCount/(Time>0? Time:1);
+    TimeStamp  = NewTS;
+    FrameCount = 0;
+    FrameRate  = FrameRate>999? 999:FrameRate;
+  }
+
   /* If not scaling or post-processing image, avoid extra work */
   if(!(Effects&(EFF_SOFTEN|EFF_SCALE|EFF_TVLINES)))
   {
+		/* Show framerate if requested */
+		if((Effects&EFF_SHOWFPS)&&(FrameRate>0))
+		{
+			char S[8];
+			sprintf(S,"%02dfps",FrameRate);
+			PrintXY(VideoImg,S,
+					8,8,
+					FPS_COLOR,PIXEL(255,255,255)
+					);
+		}
 		screen_buffer_t screen_buf[1];
 		screen_get_window_property_pv(window, SCREEN_PROPERTY_RENDER_BUFFERS, (void **)screen_buf);
 
@@ -216,8 +242,8 @@ int ShowVideo(void)
     sprintf(S,"%dfps",FrameRate);
     PrintXY(
       &OutImg,S,
-      ((OutImg.W-VideoW)>>1)+8,((OutImg.H-VideoH)>>1)+8,
-      FPS_COLOR,-1
+      8,8,
+      FPS_COLOR,PIXEL(255,255,255)
     );
   }
 
@@ -502,6 +528,19 @@ void BPSSetEffects(int NewEffects)
   Effects=NewEffects;
 }
 
+int BPSGetEffects()
+{
+	return Effects;
+}
+
+void BPSToggleEffects(int eff)
+{
+	if (Effects & eff)
+		Effects &= ~eff;
+	else
+		Effects |= eff;
+}
+
 extern Image OutImage;
 extern Image ScrImage;
 
@@ -512,7 +551,7 @@ void handleNavigatorEvent(bps_event_t* event)
 	if (code == NAVIGATOR_SWIPE_DOWN)
 	{
 		int T;
-		int M = AutoLoadRom(T, 1);
+		int M = doContextMenu(T);
 		if (M >= 0 && M != (ATI_MODEL & Mode))
 		{
 			TrashTI85();
@@ -555,6 +594,8 @@ void handleNavigatorEvent(bps_event_t* event)
 	}
 }
 
+bool mouse_pressed = false;
+
 void handleScreenEvent(bps_event_t* event)
 {
 	screen_event_t screen_event = screen_event_get_event(event);
@@ -565,6 +606,7 @@ void handleScreenEvent(bps_event_t* event)
 	int x = pair[0];
 	int y = pair[1];
 	int J, type;
+	int buttons;
 	switch(screen_val)
 	{
 	case SCREEN_EVENT_KEYBOARD:
@@ -715,6 +757,19 @@ void handleScreenEvent(bps_event_t* event)
 		break;
 	case SCREEN_EVENT_MTOUCH_RELEASE:
 		(*MouseHandler)(x, y, 0);
+		break;
+	case SCREEN_EVENT_POINTER:
+		screen_get_event_property_iv(screen_event, SCREEN_PROPERTY_BUTTONS, &buttons);
+		if (buttons == SCREEN_LEFT_MOUSE_BUTTON)
+		{
+			mouse_pressed = true;
+			(*MouseHandler)(x, y, 1);
+		}
+		else
+		{
+			mouse_pressed = false;
+			(*MouseHandler)(x, y, 0);
+		}
 		break;
 	}
 }

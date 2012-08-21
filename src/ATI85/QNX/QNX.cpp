@@ -143,7 +143,8 @@ int InitMachine(void)
   KeyReady      = 0;
 
   /* Initialize system resources */
-  InitQNX(Title,UseZoom*WIDTH,UseZoom*HEIGHT);
+  if (!InitQNX(Title,UseZoom*WIDTH,UseZoom*HEIGHT))
+	  return 0;
 
   /* Set visual effects */
   BPSSetEffects(UseEffects);
@@ -151,7 +152,7 @@ int InitMachine(void)
   /* Create main image buffer */
   if(!NewImage(&OutImage,WIDTH,HEIGHT)) { TrashQNX(); return(0); }
   ClearImage(&OutImage,PIXEL(0,0,0));
-  CropImage(&ScrImage,&OutImage,XOFFSET,YOFFSET,4*TIWIDTH,4*TIHEIGHT);
+  CropImage(&ScrImage,&OutImage,XOFFSET,YOFFSET,(TI83_FAMILY?5:4)*TIWIDTH,4*TIHEIGHT);
 
   /* Initialize video to main image */
   SetVideo(&OutImage,0,0,WIDTH,HEIGHT);

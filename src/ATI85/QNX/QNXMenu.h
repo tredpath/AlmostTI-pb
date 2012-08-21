@@ -23,8 +23,12 @@ std::vector<std::string> sortAlpha(std::vector<std::string> sortThis);
 
 void UpdateRomList();
 
-int AutoLoadRom(int &M, bool showAbout = 0);
+int AutoLoadRom(int &M, bool showInfo = 0);
 
 void ProgramInfo();
+
+int doContextMenu(int &M);
+
+int msg_box1(const char *title, const char *message);
 
 #endif /* MENU_H_ */

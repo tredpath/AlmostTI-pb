@@ -101,10 +101,12 @@ int PauseAudio(int Switch);
 /*************************************************************/
 void BPSProcessEvents(void);
 
-/** X11SetEffects() ******************************************/
+/** BPSSetEffects() ******************************************/
 /** Set visual effects applied to video in ShowVideo().     **/
 /*************************************************************/
 void BPSSetEffects(int NewEffects);
+int BPSGetEffects();
+void BPSToggleEffects(int eff);
 
 #ifdef __cplusplus
 }
