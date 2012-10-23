@@ -25,6 +25,7 @@
 #include <bps/navigator.h>
 #include <bps/event.h>
 #include <bps/dialog.h>
+#include <bps/deviceinfo.h>
 
 #include <ctype.h>
 #include <unistd.h>
@@ -579,8 +580,16 @@ void handleNavigatorEvent(bps_event_t* event)
 		for (;;)
 		{
 			bps_get_event(&activation_event, -1);
-			if (event && (bps_event_get_code(activation_event) == NAVIGATOR_WINDOW_ACTIVE))
-				break;
+			if (event)
+			{
+				if (bps_event_get_code(activation_event) == NAVIGATOR_WINDOW_ACTIVE)
+					break;
+				else if (bps_event_get_code(activation_event) == NAVIGATOR_EXIT)
+				{
+					ExitNow = 1;
+					break;
+				}
+			}
 		}
 		//if (Effects & EFF_SAVECPU)
 		//{
@@ -767,8 +776,11 @@ void handleScreenEvent(bps_event_t* event)
 		}
 		else
 		{
-			mouse_pressed = false;
-			(*MouseHandler)(x, y, 0);
+			if (mouse_pressed)
+			{
+				mouse_pressed = false;
+				(*MouseHandler)(x, y, 0);
+			}
 		}
 		break;
 	}
