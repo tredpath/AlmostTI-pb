@@ -20,6 +20,7 @@
 #include <bps/bps.h>
 #include <bps/event.h>
 #include <bps/screen.h>
+#include <bps/deviceinfo.h>
 
 #include <string>
 #include <vector>
@@ -176,6 +177,25 @@ int InitMachine(void)
   /* Initialize sync timer if needed */
   if((SyncFreq>0)&&!SetSyncTimer(SyncFreq*UPeriod/100)) SyncFreq=0;
 
+	deviceinfo_details_t* data;
+	deviceinfo_get_details(&data);
+	const char* os = deviceinfo_details_get_device_os(data);
+
+	if (strcmp(os, "BlackBerry 10") == 0)
+	{
+		int i = 0;
+		while (TouchMap[i].KeyCode)
+		{
+			TouchMap[i].X = TouchMap[i].X * 1.28;
+			TouchMap[i].W = TouchMap[i].W * 1.28;
+			TouchMap[i].Y = TouchMap[i].Y * 1.25;
+			TouchMap[i].H = TouchMap[i].H * 1.25;
+			i++;
+		}
+	}
+
+	deviceinfo_free_details(&data);
+
   /* Done */
   return(1);
 }
@@ -224,7 +244,7 @@ int ShowBackdrop(const char *FileName)
 {
 	char *P;
 	int J;
-	char* imgDir = "app/native/Backdrops";
+	const char* imgDir = "app/native/Backdrops";
 
 	/* Load background image */
 	if(!(P = (char*)malloc((imgDir ? strlen(imgDir) : 8) + 16)))
