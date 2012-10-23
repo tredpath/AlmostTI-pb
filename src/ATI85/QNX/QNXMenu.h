@@ -19,9 +19,12 @@
 #include <vector>
 #include <dirent.h>
 
+#define OK_BUTTON  1
+#define CANCEL_BUTTON  2
+
 std::vector<std::string> sortAlpha(std::vector<std::string> sortThis);
 
-void UpdateRomList();
+int UpdateRomList(int allowRetry = 1);
 
 int AutoLoadRom(int &M, bool showInfo = 0);
 
@@ -30,5 +33,6 @@ void ProgramInfo();
 int doContextMenu(int &M);
 
 int msg_box1(const char *title, const char *message);
+int msg_box2(const char *title, const char *message);
 
 #endif /* MENU_H_ */
