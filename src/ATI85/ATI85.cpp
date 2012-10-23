@@ -48,7 +48,8 @@ int main(int argc,char *argv[])
 	mkdir("shared/misc/TI/RAM/", 0777);
 
 	dialog_request_events(0);
-	UpdateRomList();
+	if (!UpdateRomList())
+		exit(-1);
 
     int M, T;
 
@@ -79,18 +80,18 @@ int main(int argc,char *argv[])
 		bps_shutdown();
 		return 0;
 	}
+	if(!InitMachine()) return(1);
 
-LOADROM:
 	if ((M = AutoLoadRom(T, true)) < 0)
 	{
 		bps_shutdown();
 		return 0;
 	}
-    Mode=(Mode&~ATI_MODEL)|M;
+	Mode=(Mode&~ATI_MODEL)|M;
 
 	RAMFile = (char*)malloc(sizeof(char)*strlen(Config[T].RAMFile));
 	strcpy(RAMFile, Config[T].RAMFile);
-	if(!InitMachine()) return(1);
+
 	while (!StartTI85())
 	{
 		if ((M = AutoLoadRom(T, true)) < 0)
