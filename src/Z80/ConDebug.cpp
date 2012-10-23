@@ -26,11 +26,11 @@
 /*************************************************************/
 
 #include "Z80.h"
-#include "Console.h"
+#include "../EMULib/Console.h"
 #include <stdlib.h>
 
 #define DebugZ80 OriginalDebugZ80
-#include "Debug.c"
+#include "Debug.h"
 #undef DebugZ80
 
 #define CLR_BACK   PIXEL(255,255,255)
