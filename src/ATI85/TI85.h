@@ -87,7 +87,7 @@ typedef struct
   const char *RAMFile;
   int         RAMSize;
 } TIConfig;
- 
+
 /** Keys *****************************************************/
 #define KBD_SET(K)  KbdStatus[Keys[K][0]]&=~Keys[K][1];lastKeyTouch=K
 #define KBD_RES(K)  KbdStatus[Keys[K][0]]|=Keys[K][1];lastKeyTouch=0
@@ -166,6 +166,7 @@ extern const char *ProgDir;    /* Program directory          */
 extern const char *LinkPeer;   /* Link peer IP address       */
 extern int LinkPort;           /* Link peer IP port          */
 extern const TIConfig Config[];/* Config parameters by model */
+extern char TIFilename[10];		   /* The name of the ROM files to load */
 
 /** StartTI85() **********************************************/
 /** Allocate memory, load ROM image, initialize hardware,   **/

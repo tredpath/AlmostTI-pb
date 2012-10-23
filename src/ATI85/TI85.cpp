@@ -72,6 +72,7 @@ const TIConfig Config[] =
   { ATI_TI84SE,"TI84SE.png","TI84SE.ROM",0x200000,"shared/misc/TI/RAM/TI84SE.RAM",0x20000 },*/
   { 0,0,0,0,0,0 }
 };
+char TIFilename[10];
 
 /** Keys[][] *************************************************/
 /** Map between KBD_* values and keyboard rows/columns.     **/
@@ -213,7 +214,7 @@ int StartTI85()
   {
     J=LoadSTA(RAMFile);
     if(Verbose)
-      printf("Loading %s...%s\n",RAMFile,J? "OK":"FAILED");
+      printf("Loading %s...%s\n",RAMFile,J? "OK":"FAILED");fflush(stdout);
   }
 
   if(Verbose) printf("RUNNING ROM CODE...\n");
@@ -266,7 +267,8 @@ int ResetTI85(int NewMode)
     /* Try loading ROM file */
     J=0;
     if(Verbose) printf("Loading %s...",Config[M].ROMFile);
-    if(F=fopen(Config[M].ROMFile,"rb"))
+    //if(F=fopen(Config[M].ROMFile,"rb"))
+    if (F = fopen(TIFilename, "rb"))
     {
     	fseek(F, 0, SEEK_END);
     	J = ftell(F);
@@ -274,10 +276,19 @@ int ResetTI85(int NewMode)
     	{
     		char errMsg[256];
     		sprintf(errMsg, "The ROM file %s must be <b>%d</b> bytes, the one provided is <b>%d</b> bytes.", Config[M].ROMFile, Config[M].ROMSize, J);
-    		msg_box1("Error", errMsg);
-    		fclose(F);
-    	    if(WorkDir) { chdir(WorkDir); free(WorkDir); }
-    		return 0;
+    		if (msg_box2("Error", errMsg) == CANCEL_BUTTON)
+    		{
+				fclose(F);
+				if(WorkDir) { chdir(WorkDir); free(WorkDir); }
+				return 0;
+    		}
+    		else
+    		{
+        		rewind(F);
+    			J = fread(ROM,1,Config[M].ROMSize,F);
+    			J = (J==Config[M].ROMSize);
+    			fclose(F);
+    		}
     	}
     	else
     	{
@@ -287,7 +298,7 @@ int ResetTI85(int NewMode)
 			fclose(F);
     	}
     }
-    if(Verbose) puts(J? "OK":"FAILED");
+    if(Verbose) puts(J? "OK":"FAILED");fflush(stdout);
 
     /* Get back to the current directory */
     if(WorkDir) { chdir(WorkDir);free(WorkDir); }
@@ -431,6 +442,24 @@ int SaveSTA(const char *FileName)
 
   /* Done */
   fclose(F);
+#if 0
+  F=fopen("shared/misc/TI/RAM/Test.RAM", "w");
+  if (F)
+  {
+	  int page, addr;
+	  for (page = 0; page < 2; page++)
+	  {
+		  for (addr = 0; addr < 16384; addr++)
+		  {
+			  fprintf(F, "%02X %04X: ", page, addr);
+			  for (int i = 0; i < 32; i++)
+				  fprintf(F, "%02X ", RAM[page * 16384 + addr + i]);
+			  fputc('\n', F);
+		  }
+	  }
+  }
+  fclose(F);
+#endif
   return(1);
 }
 
